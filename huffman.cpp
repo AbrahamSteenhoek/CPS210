@@ -13,8 +13,6 @@
 #include <bitset>
 #include "chartobits.h"
 
-// cd /mnt/c/Users/AJ\ Steenhoek/Documents/Fall_2017/Data_Structures/lab10
-// g++ -std=c++14 huffman.cpp -ohuffman
 using namespace std;
 
 namespace Huffman {
@@ -70,7 +68,6 @@ public:
 std::priority_queue<Node*, std::vector<Node*>, Greater> minheap;
 std::map<char, std::string> codes;
 CompressionTree tree;
-//string bits;
 
 // An iterative process to encode all the chars in the file
 void encode(Node* node) {
@@ -111,18 +108,12 @@ string bitString(const char* filename) {
 
 	while (ifs.good()) {
 	bits += codes[c];
-	//std::cout << c;
 	c = ifs.get();
 	}
 	bits += codes[c];
 
-	//cout << bits.size() << endl;
-	//tag on the padding bits
 	int rem = 8 - bits.size() % 8;
-	//cout << rem << endl;
 	std::bitset<8> header(rem);
-
-	//cout << 8 + rem << endl;
 
 	string pad = "";
 	while(rem--) {
@@ -132,7 +123,6 @@ string bitString(const char* filename) {
 	bits = header.to_string() + pad + bits;
 
 	ifs.close();
-	//cout << bits.size() << endl;
 	return bits;
 }
 
@@ -191,7 +181,7 @@ bool readCounts(const char *filename, std::array<int, 256> &counts) {
 	return true;
 }
 
-// NOTE: pops everything off of the heap
+// NOTE: Testing function!  Pops everything off of the minheap
 void printHeap() {
 	while (!minheap.empty()) {
 		printf("%c ", minheap.top()->c);
@@ -234,10 +224,7 @@ bool getCounts(const char *filename, std::array<int, 256> &counts) {
 	return true;
 }
 
-//fail
 bool readBits(string filename, string &contents) {
-	//inorderPrint(tree.root);
-	//printCodes();
 	FILE *file = fopen(filename.c_str(), "rb");
 	if (nullptr == file) { return false; }
 	unsigned char skipbits;
@@ -260,21 +247,10 @@ bool readBits(string filename, string &contents) {
 		bits.pop();
 	}
 
-	// while(!bits.empty()) {
-	// 	cout << bits.front();
-	// 	bits.pop();
-	// }
-	//cout << endl;
 	Node *node = tree.root;
-	//cout << "decode file" << endl;
 	while (!bits.empty()) {
 		if(node->isLeaf()) {
-			//FILE *outfile = fopen(outfilename.c_str(), "wb");
-			//fwrite(&(node->c), 1, 1, outfile);
-			//fclose(outfile);
 			contents += string(1,node->c);
-			// cout << node->c << endl;
-			// add char to file
 			node = tree.root;
 			continue;
 		}
@@ -299,14 +275,11 @@ bool readBits(string filename, string &contents) {
 
 } // end of namespace Huffman
 
-//using namespace std;
-
 int main(int argc, const char *argv[]) {
 	if (argc < 3) { 
 		puts("usage/compress: huffman -c fileToCompress\nusage/decompress: huffman -d fileToDecompress"); 
 		exit(1); 
 	}
-	//cout << "main" << endl;
 	if (strcmp(argv[1], "-d") == 0) {
 		
 		string unzipFilename(argv[2]);
@@ -318,18 +291,9 @@ int main(int argc, const char *argv[]) {
 		std::array<int, 256> counts;
 		
 		Huffman::readCounts(treeFilename.c_str(), counts);
-		// for (int k=0; k < 256; ++k) {
-		// 	if (counts[k] > 0) {
-		// 		printf("%3d %c: %d\r\n", k, ((32 < k && k < 127) ? ((char)k) : ' '), counts[k]);
-		// 	}
-		// }
 		Huffman::buildTree(counts);
 		string contents = "";
 		Huffman::readBits(unzipFilename.c_str(), contents);
-		
-		//cout << contents << endl;
-		// Huffman::inorderPrint(Huffman::tree.root);
-		// cout << endl;
 	} 
 	else if (strcmp(argv[1], "-c") == 0) {
 		std::array<int, 256> counts;
@@ -338,11 +302,6 @@ int main(int argc, const char *argv[]) {
 			exit(2);
 		}
 		Huffman::buildTree(counts);
-		// for (int k=0; k < 256; ++k) {
-		// 	if (counts[k] > 0) {
-		// 		printf("%3d %c: %d\r\n", k, ((32 < k && k < 127) ? ((char)k) : ' '), counts[k]);
-		// 	}
-		// }
 
 		std::string treeFilename(argv[2]);
 		std::string zipFilename(argv[2]);
@@ -351,20 +310,9 @@ int main(int argc, const char *argv[]) {
 		// writes freq to .tree file
 		Huffman::writeCounts(treeFilename.c_str(), counts);
 		Huffman::encode(Huffman::tree.root);
-		// Huffman::printCodes();
-		// Huffman::inorderPrint(Huffman::tree.root);
-		// cout << endl;
 		string bitString = Huffman::bitString(argv[2]);
-		// cout << bitString << endl;
-		// Huffman::inorderPrint(Huffman::tree.root);
-		// cout << endl;
 		CharToBits ch(bitString);
 		int len = ch.insertBits(zipFilename.c_str());
-		// if(len == bitString.size()) {
-		// 	cout << "Compression successful" << endl;
-		// }
-		// else
-		//  cout << "Compression failed" << endl;
 	} else {
 		puts("usage/compress: huffman -c fileToCompress\nusage/decompress: huffman -d fileToDecompress"); 
 		exit(1); 
